@@ -2,6 +2,8 @@
 
 Simple decrypter for strings used in SamSam Ransomware samples.
 
+![Screenshot](screenshot.png)
+
 ## Dependencies
 
 * [ICSharpDecompiler](https://github.com/icsharpcode/ILSpy/tree/master/ICSharpCode.Decompiler) - Decompiler for C# binaries
