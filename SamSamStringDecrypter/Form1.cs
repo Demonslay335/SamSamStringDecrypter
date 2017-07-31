@@ -274,19 +274,65 @@ namespace SamSamStringDecrypter
             string code = codeReader.ReadToEnd();
 
             // Build regex to extract strings
-            string SharedSecretPattern = @"private static string msaltpassss = \""(?<SharedSecret>.+)\"";";
-            string SaltPattern = @"private static byte\[\] _salt = Encoding.ASCII.GetBytes\(\""(?<Salt>.+)\""\);";
-            string EncryptedStringsPattern = @"encc.DecryptStringAES\(\""(?<String>.+)\"",";
+            List<string> SharedSecretPatterns = new List<string>()
+            {
+                @"private static string msaltpassss = \""(?<SharedSecret>.+)\"";",
+                @"private static string e1 = \""(?<SharedSecret>.+)\"";"
+            };
+            List<string> SaltPatterns = new List<string>()
+            {
+                @"private static byte\[\] _salt = Encoding.ASCII.GetBytes\(\""(?<Salt>.+)\""\);"
+            };
+            List<string> EncryptedStringsPatterns = new List<string>()
+            {
+                @"encc.DecryptStringAES\(\""(?<String>.+)\"",",
+                @"encc.myff11\(\""(?<String>.+)\"","
+            };
 
-            // Match regex
-            Match SharedSecretMatch = Regex.Match(code, SharedSecretPattern);
-            Match SaltMatch = Regex.Match(code, SaltPattern);
-            MatchCollection StringsMatch = Regex.Matches(code, EncryptedStringsPattern);
+            // Enumerate the shared secret patterns
+            foreach(string SharedSecretPattern in SharedSecretPatterns)
+            {
+                // Match regex
+                Match SharedSecretMatch = Regex.Match(code, SharedSecretPattern);
 
-            // Fill in the payload object from the extracted data
-            payload.SharedSecret = SharedSecretMatch.Groups["SharedSecret"].Value;
-            payload.Salt = SaltMatch.Groups["Salt"].Value;
-            payload.Strings = StringsMatch.Cast<Match>().Select(m => m.Groups["String"].Value).ToList();
+                // Check for success
+                if (SharedSecretMatch.Success)
+                {
+                    // Extract the value
+                    payload.SharedSecret = SharedSecretMatch.Groups["SharedSecret"].Value;
+                    break;
+                }
+            }
+
+            // Enumerate the salt patterns
+            foreach(string SaltPattern in SaltPatterns)
+            {
+                // Match regex
+                Match SaltMatch = Regex.Match(code, SaltPattern);
+
+                // Check for success
+                if (SaltMatch.Success)
+                {
+                    // Extract the value
+                    payload.Salt = SaltMatch.Groups["Salt"].Value;
+                    break;
+                }
+            }
+
+            // Enumerate encrypted string patterns
+            foreach(string EncryptedStringsPattern in EncryptedStringsPatterns)
+            {
+                // Match regex
+                MatchCollection StringsMatch = Regex.Matches(code, EncryptedStringsPattern);
+
+                // Check for success
+                if (StringsMatch.Count > 0)
+                {
+                    // Extract the value
+                    payload.Strings = StringsMatch.Cast<Match>().Select(m => m.Groups["String"].Value).ToList();
+                    break;
+                }
+            }
 
             // Set the payload object as the result
             args.Result = payload;
