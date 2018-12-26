@@ -94,5 +94,16 @@ namespace SamSamStringDecrypter
             }
             return array2;
         }
+
+        // Decode Unicode string
+        public static string DecodeStringUnicode(string encodedString)
+        {
+            byte[] array = new byte[encodedString.Length / 2];
+            for (int i = 0; i < array.Length; i++)
+            {
+                array[i] = Convert.ToByte(encodedString.Substring(i * 2, 2), 16);
+            }
+            return Encoding.Unicode.GetString(array);
+        }
     }
 }

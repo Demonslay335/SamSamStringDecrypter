@@ -45,8 +45,11 @@ namespace SamSamStringDecrypter
 
             // Setup drag-and-drop
             this.AllowDrop = true;
-            this.DragEnter += new DragEventHandler(File_DragEnter);
-            this.DragDrop += new DragEventHandler(File_DragDrop);
+            this.DragEnter += File_DragEnter;
+            this.DragDrop += File_DragDrop;
+            EncryptedStringsTextbox.AllowDrop = true;
+            EncryptedStringsTextbox.DragEnter += File_DragEnter;
+            EncryptedStringsTextbox.DragDrop += File_DragDrop;
 
             // Setup decryption worker
             DecryptBackgroundWorker.DoWork += DecryptStrings;
@@ -167,8 +170,17 @@ namespace SamSamStringDecrypter
                     // Check for an actual string
                     if (EncryptedString != null && EncryptedString.Length > 0)
                     {
-                        // Decrypt string and add to the list
-                        DecryptedStrings.Add(Decrypter.DecryptStringAES(EncryptedString));
+                        // Check for unicode string
+                        if (Regex.IsMatch(EncryptedString, @"^(([A-F0-9]{2})([0]{2}))*$"))
+                        {
+                            // Decode string and add to the list
+                            DecryptedStrings.Add(Decrypter.DecodeStringUnicode(EncryptedString));
+                        }
+                        else
+                        {
+                            // Decrypt string and add to the list
+                            DecryptedStrings.Add(Decrypter.DecryptStringAES(EncryptedString));
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -213,9 +225,13 @@ namespace SamSamStringDecrypter
             {
                 // Get payload from result
                 Payload payload = (Payload) e.Result;
-
-                // Display the encrypted strings, joined by new lines
-                EncryptedStringsTextbox.Text = string.Join(Environment.NewLine, payload.Strings.ToArray());
+                
+                // Check for encrypted strings
+                if (payload.Strings != null)
+                {
+                    // Display the encrypted strings, joined by new lines
+                    EncryptedStringsTextbox.Text = string.Join(Environment.NewLine, payload.Strings.ToArray());
+                }
 
                 // Set decrypter fields
                 Decrypter.SharedSecret = payload.SharedSecret;
@@ -286,7 +302,8 @@ namespace SamSamStringDecrypter
             List<string> EncryptedStringsPatterns = new List<string>()
             {
                 @"encc.DecryptStringAES\(\""(?<String>.+)\"",",
-                @"encc.myff11\(\""(?<String>.+)\"","
+                @"encc.myff11\(\""(?<String>.+)\"",",
+                @"\""(?<String>([A-F0-9]{2})*)\"""
             };
 
             // Enumerate the shared secret patterns
