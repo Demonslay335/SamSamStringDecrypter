@@ -4,6 +4,9 @@ Simple decrypter for strings used in SamSam Ransomware samples.
 
 ![Screenshot](screenshot.png)
 
+## Compiled Executable
+Official Download: [BleepingComputer Mirror](https://download.bleepingcomputer.com/demonslay335/SamSamStringDecrypter.zip)
+
 ## Dependencies
 
 * [ICSharpDecompiler](https://github.com/icsharpcode/ILSpy/tree/master/ICSharpCode.Decompiler) - Decompiler for C# binaries
