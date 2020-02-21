@@ -293,7 +293,8 @@ namespace SamSamStringDecrypter
             List<string> SharedSecretPatterns = new List<string>()
             {
                 @"private static string msaltpassss = \""(?<SharedSecret>.+)\"";",
-                @"private static string e1 = \""(?<SharedSecret>.+)\"";"
+                @"private static string e1 = \""(?<SharedSecret>.+)\"";",
+                @"private static string mySalt = \""(?<SharedSecret>.+)\"";"
             };
             List<string> SaltPatterns = new List<string>()
             {
